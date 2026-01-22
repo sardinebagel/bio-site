@@ -1,15 +1,13 @@
 // API Configuration
-// These URLs are configured via environment variables during deployment
-
 export const API_CONFIG = {
   // The validation endpoint - validates tokens and returns metadata
-  validateUrl: import.meta.env.VITE_API_URL || '/api/validate',
+  validateUrl: 'https://api.cameronjim.com/validate',
   
   // Short link base URL (for reference/display purposes)
-  shortLinkBase: import.meta.env.VITE_SHORT_LINK_URL || '',
+  shortLinkBase: 'https://go.cameronjim.com',
   
   // Main site URL
-  siteUrl: import.meta.env.VITE_SITE_URL || '',
+  siteUrl: 'https://www.cameronjim.com',
 }
 
 export interface TokenValidationResponse {

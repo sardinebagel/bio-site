@@ -1,0 +1,11 @@
+{
+  "name": "redirect-lambda",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Redirect Lambda for go.cameronjim.com short links",
+  "main": "index.mjs",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0"
+  }
+}

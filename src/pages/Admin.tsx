@@ -20,6 +20,69 @@ interface Event {
   userAgent?: string
 }
 
+interface AnalyticsItemProps {
+  token: Token
+  accessCount: number
+  lastAccessed: string | null
+  events: Event[]
+  formatDate: (dateStr: string | number) => string
+}
+
+function AnalyticsItem({ token, accessCount, lastAccessed, events, formatDate }: AnalyticsItemProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  return (
+    <div className="analytics-item">
+      <div 
+        className="analytics-item-header" 
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="analytics-item-info">
+          <strong>{token.campaign}</strong>
+          <span className="token-code">{token.token}</span>
+        </div>
+        <div className="analytics-item-stats">
+          <span className="access-count">
+            {accessCount} {accessCount === 1 ? 'view' : 'views'}
+          </span>
+          {lastAccessed && (
+            <span className="last-accessed">
+              Last: {formatDate(lastAccessed)}
+            </span>
+          )}
+          {!lastAccessed && (
+            <span className="no-views">No views yet</span>
+          )}
+        </div>
+        <button className="expand-btn">
+          {isExpanded ? '−' : '+'}
+        </button>
+      </div>
+      
+      {isExpanded && (
+        <div className="analytics-item-details">
+          {events.length === 0 ? (
+            <p className="no-events">No activity recorded for this link yet.</p>
+          ) : (
+            <div className="event-timeline">
+              <h4>Access History ({events.length})</h4>
+              {events.map((event, index) => (
+                <div key={index} className="timeline-event">
+                  <div className="timeline-dot"></div>
+                  <div className="timeline-content">
+                    <span className="timeline-type">{event.type}</span>
+                    <span className="timeline-time">{formatDate(event.timestamp)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Admin() {
   const [password, setPassword] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -283,29 +346,39 @@ function Admin() {
         
         {activeTab === 'events' && (
           <div className="events-panel">
-            <h2>Recent Activity ({events.length})</h2>
-            <button 
-              onClick={() => { loadTokens(password); loadEvents(password); }} 
-              className="refresh-btn"
-            >
-              Refresh
-            </button>
+            <div className="analytics-header">
+              <h2>Analytics by Link</h2>
+              <button 
+                onClick={() => { loadTokens(password); loadEvents(password); }} 
+                className="refresh-btn"
+              >
+                Refresh
+              </button>
+            </div>
             
-            <div className="events-list">
-              {events.length === 0 ? (
-                <p className="no-data">No activity recorded yet</p>
+            <div className="analytics-list">
+              {tokens.length === 0 ? (
+                <p className="no-data">No links created yet</p>
               ) : (
-                events.map((event, index) => (
-                  <div key={index} className="event-item">
-                    <div className="event-info">
-                      <strong>{event.campaign || event.token}</strong>
-                      <span className="event-type">{event.type}</span>
-                    </div>
-                    <div className="event-time">
-                      {formatDate(event.timestamp)}
-                    </div>
-                  </div>
-                ))
+                tokens.map((token) => {
+                  // Get events for this specific token
+                  const tokenEvents = events.filter(e => e.token === token.token);
+                  const lastAccessed = tokenEvents.length > 0 
+                    ? tokenEvents[0].timestamp 
+                    : null;
+                  const accessCount = tokenEvents.length;
+                  
+                  return (
+                    <AnalyticsItem
+                      key={token.token}
+                      token={token}
+                      accessCount={accessCount}
+                      lastAccessed={lastAccessed}
+                      events={tokenEvents}
+                      formatDate={formatDate}
+                    />
+                  );
+                })
               )}
             </div>
           </div>
